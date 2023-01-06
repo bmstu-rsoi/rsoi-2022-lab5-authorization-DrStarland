@@ -4,22 +4,22 @@
 	"values": [
 		{
 			"key": "serviceUrl",
-			"value": "",
+			"value": "https://load-balancer-drstarland.cloud.okteto.net/",
 			"enabled": true
 		},
 		{
 			"key": "identityProviderUrl",
-			"value": "",
+			"value": "https://load-balancer-drstarland.cloud.okteto.net/",
 			"enabled": true
 		},
 		{
 			"key": "username",
-			"value": "",
+			"value": "rvasily",
 			"enabled": true
 		},
 		{
 			"key": "password",
-			"value": "",
+			"value": "lovelove",
 			"enabled": true
 		},
 		{
