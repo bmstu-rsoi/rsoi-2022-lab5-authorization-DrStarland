@@ -9,6 +9,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"gateway/pkg/handlers"
+	"gateway/pkg/session"
 
 	mid "gateway/pkg/middleware"
 
@@ -27,6 +28,8 @@ func main() {
 	router := httprouter.New()
 	router.PanicHandler = mid.PanicHandler
 
+	sm := session.NewSessionsManager()
+
 	gs := &handlers.GatewayHandler{
 		TicketServiceAddress: "http://testum-tickets:8070",
 		FlightServiceAddress: "http://testum-flights:8060",
@@ -34,13 +37,13 @@ func main() {
 		Logger:               logger,
 	}
 
-	router.GET("/api/v1/flights", mid.AccessLog(gs.GetAllFlights, logger))
-	router.GET("/api/v1/me", mid.AccessLog(gs.GetUserInfo, logger))
-	router.GET("/api/v1/tickets", mid.AccessLog(gs.GetUserTickets, logger))
-	router.GET("/api/v1/tickets/:ticketUID", mid.AccessLog(gs.GetUserTicket, logger))
-	router.POST("/api/v1/tickets", mid.AccessLog(gs.BuyTicket, logger))
-	router.DELETE("/api/v1/tickets/:ticketUID", mid.AccessLog(gs.CancelTicket, logger))
-	router.GET("/api/v1/privilege", mid.AccessLog(gs.GetPrivilege, logger))
+	router.GET("/api/v1/flights", mid.AccessLog(mid.Auth(gs.GetAllFlights, sm), logger))
+	router.GET("/api/v1/me", mid.AccessLog(mid.Auth(gs.GetUserInfo, sm), logger))
+	router.GET("/api/v1/tickets", mid.AccessLog(mid.Auth(gs.GetUserTickets, sm), logger))
+	router.GET("/api/v1/tickets/:ticketUID", mid.AccessLog(mid.Auth(gs.GetUserTicket, sm), logger))
+	router.POST("/api/v1/tickets", mid.AccessLog(mid.Auth(gs.BuyTicket, sm), logger))
+	router.DELETE("/api/v1/tickets/:ticketUID", mid.AccessLog(mid.Auth(gs.CancelTicket, sm), logger))
+	router.GET("/api/v1/privilege", mid.AccessLog(mid.Auth(gs.GetPrivilege, sm), logger))
 
 	router.GET("/manage/health", HealthOK)
 

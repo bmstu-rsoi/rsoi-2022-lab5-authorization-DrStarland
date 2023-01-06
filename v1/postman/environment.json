@@ -4,32 +4,32 @@
 	"values": [
 		{
 			"key": "serviceUrl",
-			"value": "https://load-balancer-drstarland.cloud.okteto.net/",
+			"value": "https://load-balancer-drstarland.cloud.okteto.net",
 			"enabled": true
 		},
 		{
 			"key": "identityProviderUrl",
-			"value": "https://load-balancer-drstarland.cloud.okteto.net/",
+			"value": "https://dev-98541142.okta.com",
 			"enabled": true
 		},
 		{
 			"key": "username",
-			"value": "rvasily",
+			"value": "ojmutmhlacsxrhkgds@tmmcv.com",
 			"enabled": true
 		},
 		{
 			"key": "password",
-			"value": "lovelove",
+			"value": "228lohNemamont$",
 			"enabled": true
 		},
 		{
 			"key": "clientId",
-			"value": "",
+			"value": "0oa7v8rairOUbYAvy5d7",
 			"enabled": true
 		},
 		{
 			"key": "clientSecret",
-			"value": "",
+			"value": "iQcihL2DDY6AXyYG3_0XuPsFdWQ9w9vk98xFKBIR",
 			"enabled": true
 		}
 	],
