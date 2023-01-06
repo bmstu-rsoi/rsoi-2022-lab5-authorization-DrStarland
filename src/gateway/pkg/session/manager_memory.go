@@ -9,6 +9,7 @@ import (
 
 	"github.com/MicahParks/keyfunc"
 	jwt "github.com/golang-jwt/jwt/v4"
+	"go.uber.org/zap"
 )
 
 const RawJWKS = `{"keys":[{"kty":"RSA","alg":"RS256","kid":"owcDPUuU5QB8_ojBnoIVl9pbb3iPsSc15cenVbavZQo","use":"sig","e":"AQAB","n":"quqU1buEQMDreTIXabUD491R05xrBpTkn5mf9JUtRWjtFp1qj5mQ7fpagYrs0nxbnJtHESbdTnoF1bsUT4qmXnldOC7VrZZr4mW3fhlNjF176yF4mFSjqCcRaj3uELBc2vbpEn-xasS0oyjr-pQ9n5MGQWkHCUzDm1yigunTYqIALnRFLBLTesXWzKyFHggvTeIjgVt-kPDPjn8bzwQrZC4MC0s-gmgHXZnY7wQMCJ33satSzrbe_XikoJsyKEUfeU3SKjd_MVhuvvvWSv9BUJWsgUzxySnBSGxIlydYPqVdLB6YN4sEItRBbLC0_0m3uYyAQpew7IaHda7yQoIW9Q"}]}`
@@ -40,6 +41,11 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 		return nil, fmt.Errorf("no Authorization header") // token is missing
 	}
 
+	zapLogger, _ := zap.NewProduction()
+	defer zapLogger.Sync() // flushes buffer, if any
+	logger := zapLogger.Sugar()
+	logger.Infoln("Token: ", IncomingToken)
+
 	// удаляем надпись в начале токена, поскольку она всегда одинакова -- можно "захардкодить"
 	// Bearer_tokentokentokentoken
 	IncomingToken = IncomingToken[7:]
@@ -47,6 +53,8 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 	sess := &Session{}
 	jwks := newJWKs(RawJWKS)
 	token, err := jwt.ParseWithClaims(IncomingToken, sess.Token, jwks.Keyfunc)
+
+	logger.Infoln(": ", jwks, token)
 
 	if err != nil || !token.Valid {
 		return nil, ErrNoAuth // Access Denied

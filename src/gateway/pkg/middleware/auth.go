@@ -7,6 +7,7 @@ import (
 	"gateway/pkg/session"
 
 	"github.com/julienschmidt/httprouter"
+	"go.uber.org/zap"
 )
 
 func Auth(next httprouter.Handle, sm session.SessionsManager) httprouter.Handle {
@@ -23,6 +24,11 @@ func Auth(next httprouter.Handle, sm session.SessionsManager) httprouter.Handle 
 			myjson.JsonError(w, http.StatusUnauthorized, "")
 			return
 		}
+
+		zapLogger, _ := zap.NewProduction()
+		defer zapLogger.Sync() // flushes buffer, if any
+		logger := zapLogger.Sugar()
+		logger.Infoln("Token name: ", sess.Token.Subject)
 
 		r.Header.Set("X-User-Name", sess.Token.Subject)
 		ctx := session.ContextWithSession(r.Context(), sess)
