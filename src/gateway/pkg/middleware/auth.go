@@ -15,8 +15,12 @@ func Auth(next httprouter.Handle, sm session.SessionsManager) httprouter.Handle 
 		if err != nil {
 			if err == session.ErrNoAuth {
 				myjson.JsonError(w, http.StatusUnauthorized, err.Error())
+				return
 			}
 			myjson.JsonError(w, http.StatusUnauthorized, err.Error())
+			return
+		} else if sess == nil {
+			myjson.JsonError(w, http.StatusUnauthorized, "")
 			return
 		}
 

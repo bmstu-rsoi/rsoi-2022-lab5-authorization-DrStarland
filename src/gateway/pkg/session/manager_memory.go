@@ -35,7 +35,7 @@ func newJWKs(rawJWKS string) *keyfunc.JWKS {
 }
 
 func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
-	IncomingToken := r.Header.Get("authorization")
+	IncomingToken := r.Header.Get("Authorization")
 	if len(IncomingToken) == 0 {
 		return nil, fmt.Errorf("no Authorization header") // token is missing
 	}
