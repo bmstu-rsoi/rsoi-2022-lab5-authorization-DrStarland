@@ -34,6 +34,9 @@ func (h *GatewayHandler) checkUserHeader(r *http.Request) (string, bool) {
 }
 
 func (h *GatewayHandler) GetAllFlights(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	IncomingToken := r.Header.Get("Authorization")
+	h.Logger.Infoln("TOKETOKETOKE ", IncomingToken)
+
 	params := r.URL.Query()
 
 	flightsSlice, err := services.GetAllFlightsInfo(h.FlightServiceAddress)
