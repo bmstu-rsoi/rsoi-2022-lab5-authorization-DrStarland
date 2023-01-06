@@ -1,7 +1,13 @@
 name: GitHub Classroom Workflow
+
 on:
   push:
     branches: [ master ]
+
+env:
+  KUBE_HOST: ${{ secrets.OKTETO_URL }}
+  KUBE_TOKEN: ${{ secrets.OKTETO_TOKEN }}
+
 jobs:
   build:
     name: Autograding
