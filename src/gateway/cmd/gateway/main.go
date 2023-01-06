@@ -37,13 +37,13 @@ func main() {
 		Logger:               logger,
 	}
 
-	router.GET("/api/v1/flights", mid.AccessLog(mid.Auth(gs.GetAllFlights, sm), logger))
-	router.GET("/api/v1/me", mid.AccessLog(mid.Auth(gs.GetUserInfo, sm), logger))
-	router.GET("/api/v1/tickets", mid.AccessLog(mid.Auth(gs.GetUserTickets, sm), logger))
-	router.GET("/api/v1/tickets/:ticketUID", mid.AccessLog(mid.Auth(gs.GetUserTicket, sm), logger))
-	router.POST("/api/v1/tickets", mid.AccessLog(mid.Auth(gs.BuyTicket, sm), logger))
-	router.DELETE("/api/v1/tickets/:ticketUID", mid.AccessLog(mid.Auth(gs.CancelTicket, sm), logger))
-	router.GET("/api/v1/privilege", mid.AccessLog(mid.Auth(gs.GetPrivilege, sm), logger))
+	router.GET("/api/v1/flights", mid.AccessLog(mid.Auth(gs.GetAllFlights, sm, logger), logger))
+	router.GET("/api/v1/me", mid.AccessLog(mid.Auth(gs.GetUserInfo, sm, logger), logger))
+	router.GET("/api/v1/tickets", mid.AccessLog(mid.Auth(gs.GetUserTickets, sm, logger), logger))
+	router.GET("/api/v1/tickets/:ticketUID", mid.AccessLog(mid.Auth(gs.GetUserTicket, sm, logger), logger))
+	router.POST("/api/v1/tickets", mid.AccessLog(mid.Auth(gs.BuyTicket, sm, logger), logger))
+	router.DELETE("/api/v1/tickets/:ticketUID", mid.AccessLog(mid.Auth(gs.CancelTicket, sm, logger), logger))
+	router.GET("/api/v1/privilege", mid.AccessLog(mid.Auth(gs.GetPrivilege, sm, logger), logger))
 
 	router.GET("/manage/health", HealthOK)
 

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func Auth(next httprouter.Handle, sm session.SessionsManager, logger zap.SugaredLogger) httprouter.Handle {
+func Auth(next httprouter.Handle, sm session.SessionsManager, logger *zap.SugaredLogger) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		logger.Infoln("TOKETOKETOKE ", r.Header.Get("Authorization"))
 
