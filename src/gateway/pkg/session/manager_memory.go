@@ -75,7 +75,7 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 
 	if err != nil {
 		log.Println("Navalilas beda: " + err.Error())
-		return nil, ErrNoAuth // Access Denied
+		return nil, fmt.Errorf("Navalilas beda: %s", err.Error()) // Access Denied
 	}
 
 	sub := token.Claims["sub"]
@@ -83,7 +83,8 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 	beda, ok := sub.(string)
 	if !ok {
 		log.Println("beda beda")
-		return nil, ErrNoAuth
+		return nil, fmt.Errorf("beda beda: %v", beda)
+		// return nil, ErrNoAuth
 	}
 	sess.User.Username = beda
 
