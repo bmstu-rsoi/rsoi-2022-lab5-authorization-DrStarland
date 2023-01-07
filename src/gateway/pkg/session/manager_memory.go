@@ -2,9 +2,9 @@ package session
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
-	"time"
 
 	jwtverifier "github.com/okta/okta-jwt-verifier-golang"
 	"go.uber.org/zap"
@@ -37,7 +37,7 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 
 	// удаляем надпись в начале токена, поскольку она всегда одинакова -- можно "захардкодить"
 	// Bearer_tokentokentokentoken
-	IncomingToken = IncomingToken[7:]
+	// IncomingToken = IncomingToken[8:]
 
 	sess := &Session{}
 	// jwks := newJWKs(RawJWKS)
@@ -73,21 +73,18 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 	token, err := verifier.VerifyAccessToken(IncomingToken)
 
 	if err != nil {
+		log.Println("Navalilas beda: " + err.Error())
 		return nil, ErrNoAuth // Access Denied
 	}
 
 	sub := token.Claims["sub"]
 
-	sess.User.Username, _ = sub.(string)
-
-	exp, ok := token.Claims["exp"].(int64)
+	beda, ok := sub.(string)
 	if !ok {
+		log.Println("beda beda")
 		return nil, ErrNoAuth
 	}
-
-	if time.Now().Unix()-exp > 0 {
-		return nil, fmt.Errorf("jwt-token expire") // TokenExpired
-	}
+	sess.User.Username = beda
 
 	return sess, nil
 
