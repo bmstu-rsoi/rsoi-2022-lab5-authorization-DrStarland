@@ -1,18 +1,16 @@
 package session
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/MicahParks/keyfunc"
-	jwt "github.com/golang-jwt/jwt/v4"
+	jwtverifier "github.com/okta/okta-jwt-verifier-golang"
 	"go.uber.org/zap"
 )
 
-const RawJWKS = `{"keys":[{"kty":"RSA","alg":"RS256","kid":"owcDPUuU5QB8_ojBnoIVl9pbb3iPsSc15cenVbavZQo","use":"sig","e":"AQAB","n":"quqU1buEQMDreTIXabUD491R05xrBpTkn5mf9JUtRWjtFp1qj5mQ7fpagYrs0nxbnJtHESbdTnoF1bsUT4qmXnldOC7VrZZr4mW3fhlNjF176yF4mFSjqCcRaj3uELBc2vbpEn-xasS0oyjr-pQ9n5MGQWkHCUzDm1yigunTYqIALnRFLBLTesXWzKyFHggvTeIjgVt-kPDPjn8bzwQrZC4MC0s-gmgHXZnY7wQMCJ33satSzrbe_XikoJsyKEUfeU3SKjd_MVhuvvvWSv9BUJWsgUzxySnBSGxIlydYPqVdLB6YN4sEItRBbLC0_0m3uYyAQpew7IaHda7yQoIW9Q"}]}`
+// const RawJWKS = `{"keys":[{"kty":"RSA","alg":"RS256","kid":"owcDPUuU5QB8_ojBnoIVl9pbb3iPsSc15cenVbavZQo","use":"sig","e":"AQAB","n":"quqU1buEQMDreTIXabUD491R05xrBpTkn5mf9JUtRWjtFp1qj5mQ7fpagYrs0nxbnJtHESbdTnoF1bsUT4qmXnldOC7VrZZr4mW3fhlNjF176yF4mFSjqCcRaj3uELBc2vbpEn-xasS0oyjr-pQ9n5MGQWkHCUzDm1yigunTYqIALnRFLBLTesXWzKyFHggvTeIjgVt-kPDPjn8bzwQrZC4MC0s-gmgHXZnY7wQMCJ33satSzrbe_XikoJsyKEUfeU3SKjd_MVhuvvvWSv9BUJWsgUzxySnBSGxIlydYPqVdLB6YN4sEItRBbLC0_0m3uYyAQpew7IaHda7yQoIW9Q"}]}`
 
 type MemorySessionsManager struct {
 	data map[string]*Session
@@ -24,15 +22,6 @@ func NewSessionsManager() *MemorySessionsManager {
 		data: make(map[string]*Session, 10),
 		mu:   &sync.RWMutex{},
 	}
-}
-
-func newJWKs(rawJWKS string) *keyfunc.JWKS {
-	jwksJSON := json.RawMessage(rawJWKS)
-	jwks, err := keyfunc.NewJSON(jwksJSON)
-	if err != nil {
-		panic(err)
-	}
-	return jwks
 }
 
 func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
@@ -51,16 +40,52 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 	IncomingToken = IncomingToken[7:]
 
 	sess := &Session{}
-	jwks := newJWKs(RawJWKS)
-	token, err := jwt.ParseWithClaims(IncomingToken, sess.Token, jwks.Keyfunc)
+	// jwks := newJWKs(RawJWKS)
+	// token, err := jwt.ParseWithClaims(IncomingToken, sess.Token, jwks.Keyfunc)
 
-	logger.Infoln(": ", jwks, token)
+	// hashSecretGetter := func(token *jwt.Token) (interface{}, error) {
+	// 	method, ok := token.Method.(*jwt.SigningMethodHMAC)
+	// 	if !ok || method.Alg() != "RS256" {
+	// 		return nil, fmt.Errorf("bad sign method")
+	// 	}
+	// 	return ExampleTokenSecret, nil
+	// }
+	// token, err := jwt.Parse(IncomingToken, hashSecretGetter)
+	// if err != nil || !token.Valid {
+	// 	return nil, fmt.Errorf("bad token")
+	// }
 
-	if err != nil || !token.Valid {
+	// _, ok := token.Claims.(jwt.MapClaims)
+	// if !ok {
+	// 	return nil, fmt.Errorf("empty")
+	// }
+	toValidate := map[string]string{}
+	toValidate["aud"] = "api://default"
+	toValidate["cid"] = "0oa7v8rairOUbYAvy5d7"
+
+	jwtVerifierSetup := jwtverifier.JwtVerifier{
+		Issuer:           "https://dev-98541142.okta.com/oauth2/default",
+		ClaimsToValidate: toValidate,
+	}
+
+	verifier := jwtVerifierSetup.New()
+
+	token, err := verifier.VerifyAccessToken(IncomingToken)
+
+	if err != nil {
 		return nil, ErrNoAuth // Access Denied
 	}
 
-	if time.Now().Unix()-sess.Token.ExpiresAt > 0 {
+	sub := token.Claims["sub"]
+
+	sess.User.Username, _ = sub.(string)
+
+	exp, ok := token.Claims["exp"].(int64)
+	if !ok {
+		return nil, ErrNoAuth
+	}
+
+	if time.Now().Unix()-exp > 0 {
 		return nil, fmt.Errorf("jwt-token expire") // TokenExpired
 	}
 

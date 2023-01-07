@@ -27,7 +27,7 @@ func Auth(next httprouter.Handle, sm session.SessionsManager, logger *zap.Sugare
 			return
 		}
 
-		r.Header.Set("X-User-Name", sess.Token.Subject)
+		r.Header.Set("X-User-Name", sess.User.Username)
 		ctx := session.ContextWithSession(r.Context(), sess)
 		next(w, r.WithContext(ctx), ps)
 	}
