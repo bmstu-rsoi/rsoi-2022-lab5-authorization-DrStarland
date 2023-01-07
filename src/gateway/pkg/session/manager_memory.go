@@ -37,7 +37,8 @@ func (sm *MemorySessionsManager) Check(r *http.Request) (*Session, error) {
 
 	// удаляем надпись в начале токена, поскольку она всегда одинакова -- можно "захардкодить"
 	// Bearer_tokentokentokentoken
-	// IncomingToken = IncomingToken[8:]
+	IncomingToken = IncomingToken[7:]
+	logger.Infoln("Cut: ", IncomingToken)
 
 	sess := &Session{}
 	// jwks := newJWKs(RawJWKS)
